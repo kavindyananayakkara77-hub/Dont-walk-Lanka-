@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Dont Walk Lanka</title>
+<link rel="manifest" href="manifest.json" />
+<link rel="icon" href="icon-192.png" />
+<meta name="theme-color" content="#0b0812" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<link rel="apple-touch-icon" href="icon-192.png" />
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin:0; padding:0; background:#0b0812; font-family: system-ui, -apple-system, sans-serif; }
+  .screen { min-height:100vh; width:100%; display:flex; align-items:center; justify-content:center; padding:16px; }
+  .phone { width:100%; max-width:380px; height:95vh; border-radius:2.2rem; border:1px solid rgba(255,255,255,0.1);
+    overflow:hidden; position:relative; box-shadow:0 20px 60px rgba(0,0,0,0.6); display:flex; flex-direction:column;
+    background: radial-gradient(120% 90% at 10% -10%, #241633 0%, #0b0812 55%); }
+  .statusbar { display:flex; justify-content:space-between; padding:12px 24px 4px; font-size:11px; color:rgba(255,255,255,0.5); }
+  .header { padding:8px 20px 16px; display:flex; align-items:center; gap:12px; }
+  .logo { width:40px; height:40px; border-radius:12px; overflow:hidden; flex-shrink:0; }
+  .logo img { width:100%; height:100%; object-fit:cover; }
+  .brand-name { color:#fff; font-weight:800; font-size:18px; line-height:1; letter-spacing:-0.3px; }
+  .brand-sub { color:rgba(255,255,255,0.4); font-size:10px; letter-spacing:0.2em; margin-top:2px; }
+  .body { flex:1; overflow-y:auto; padding:0 20px 12px; display:flex; flex-direction:column; gap:16px; }
+  .card { border-radius:16px; border:1px solid rgba(255,255,255,0.08); background:rgba(23,18,37,0.8);
+    backdrop-filter:blur(6px); padding:16px; }
+  .btn-search { width:100%; display:flex; align-items:center; gap:12px; border-radius:16px;
+    border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.04); padding:12px 16px;
+    color:rgba(255,255,255,0.6); font-size:14px; text-align:left; }
+  .btn-primary { width:100%; border-radius:16px; padding:12px; font-weight:700; color:#1a0f08; font-size:14px;
+    background: linear-gradient(135deg,#ff6a3d,#ffb13d); border:none; }
+  .row { display:flex; align-items:center; justify-content:space-between; }
+  .row-left { display:flex; align-items:center; gap:12px; }
+  .icon-circle { width:36px; height:36px; border-radius:999px; display:flex; align-items:center; justify-content:center;
+    background:rgba(255,107,61,0.15); flex-shrink:0; }
+  .text-white { color:#fff; }
+  .text-dim { color:rgba(255,255,255,0.5); }
+  .text-faint { color:rgba(255,255,255,0.35); }
+  .fs-sm { font-size:14px; font-weight:600; }
+  .fs-xs { font-size:12px; }
+  .fs-xxs { font-size:10px; }
+  .badge { display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:999px;
+    font-size:11px; font-weight:700; border:1px solid; }
+  .badge-ok { color:#34d399; background:rgba(52,211,153,0.1); border-color:rgba(52,211,153,0.3); }
+  .badge-warn { color:#fbbf24; background:rgba(251,191,36,0.1); border-color:rgba(251,191,36,0.3); }
+  .badge-bad { color:#fb7185; background:rgba(251,113,133,0.1); border-color:rgba(251,113,133,0.3); }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .mode-box { border-radius:16px; padding:12px; display:flex; flex-direction:column; align-items:center; gap:4px; }
+  .mode-active { border:1px solid rgba(255,177,61,0.3); background:rgba(255,107,61,0.1); }
+  .mode-inactive { border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.03); }
+  .search-input { flex:1; background:transparent; border:none; outline:none; color:#fff; font-size:14px; }
+  .search-input::placeholder { color:rgba(255,255,255,0.3); }
+  .route-card { cursor:pointer; }
+  .route-card.selected { border-color:rgba(255,177,61,0.4); }
+  .track { position:relative; height:8px; border-radius:999px; background:rgba(255,255,255,0.1); margin-bottom:4px; }
+  .track-fill { position:absolute; top:0; left:0; bottom:0; border-radius:999px; transition:width 1s linear;
+    background: linear-gradient(90deg,#ff6a3d,#ffb13d); }
+  .track-dot { position:absolute; top:-8px; transition:left 1s linear; }
+  .track-dot-inner { width:20px; height:20px; border-radius:999px; display:flex; align-items:center; justify-content:center;
+    background: linear-gradient(135deg,#ff6a3d,#ffb13d); font-size:11px; box-shadow:0 4px 10px rgba(0,0,0,0.4); }
+  .stop-box { border-radius:12px; padding:10px 12px; display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+  .stop-current { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); }
+  .stop-next { background:rgba(255,107,61,0.1); border:1px solid rgba(255,177,61,0.25); }
+  .live-tag { display:flex; align-items:center; gap:6px; color:#34d399; font-size:11px; font-weight:700; margin-bottom:12px; }
+  .dot-pulse { width:8px; height:8px; border-radius:999px; background:#34d399; animation:pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+  .tabs2 { display:flex; border-radius:16px; overflow:hidden; border:1px solid rgba(255,255,255,0.1); }
+  .tab2 { flex:1; padding:10px; font-size:14px; font-weight:700; border:none; color:rgba(255,255,255,0.5); background:transparent; }
+  .tab2.active { color:#1a0f08; background: linear-gradient(135deg,#ff6a3d,#ffb13d); }
+  .buy-btn { padding:6px 12px; border-radius:999px; font-size:12px; font-weight:700; color:#1a0f08; border:none;
+    background: linear-gradient(135deg,#ff6a3d,#ffb13d); }
+  .ticket-code { border-radius:8px; background:#fdf8f0; }
+  .bottomnav { display:flex; justify-content:space-between; padding:10px 12px; border-top:1px solid rgba(255,255,255,0.1); background:rgba(0,0,0,0.3); }
+  .navbtn { flex:1; display:flex; flex-direction:column; align-items:center; gap:2px; background:none; border:none; padding:4px; }
+  .navbtn span.ic { font-size:16px; }
+  .navbtn span.lb { font-size:9px; color:rgba(255,255,255,0.35); }
+  .navbtn.active span.lb, .navbtn.active span.ic { color:#ff9d5c; }
+  input, button { font-family: inherit; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script>
+// ---------- data ----------
+const ROUTES = [
+  { id: "138", type: "bus", from: "Colombo Fort", to: "Negombo", depart: "12:30 PM", arrive: "1:45 AM", baseDelay: 6 },
+  { id: "240", type: "bus", from: "Colombo Fort", to: "Negombo", depart: "12:50 PM", arrive: "1:55 AM", baseDelay: 18 },
+  { id: "IC-04", type: "train", from: "Colombo Fort", to: "Negombo", depart: "1:05 PM", arrive: "1:40 AM", baseDelay: 0 },
+];
+const PATH = [
+  { name: "Colombo Fort", pct: 0 }, { name: "Wellawatte", pct: 22 }, { name: "Dehiwala", pct: 40 },
+  { name: "Ja-Ela", pct: 66 }, { name: "Kolupitiya Jn", pct: 84 }, { name: "Negombo", pct: 100 },
+];
+const ICONS = { bus: "🚌", train: "🚆", pin: "📍", nav: "🧭", search: "🔍", home: "🏠", ticket: "🎫", bell: "🔔", user: "👤", check: "✅", clock: "⏱️" };
+
+function delayStatus(mins) {
+  if (mins === 0) return { label: "On Time", tone: "ok" };
+  if (mins <= 8) return { label: "Minor Delay · " + mins + " min", tone: "warn" };
+  return { label: "Major Delay · " + mins + " min", tone: "bad" };
+}
+
+// ---------- state ----------
+let state = {
+  tab: "home",
+  query: "",
+  selectedRoute: ROUTES[0],
+  progress: 14,
+  location: null,
+  locStatus: "idle",
+  tickets: [],
+  ticketSubtab: "buy",
+};
+
+try { state.tickets = JSON.parse(localStorage.getItem("dwl_tickets") || "[]"); } catch (e) { state.tickets = []; }
+
+function persistTickets(next) {
+  state.tickets = next;
+  localStorage.setItem("dwl_tickets", JSON.stringify(next));
+  render();
+}
+
+function useMyLocation() {
+  if (!navigator.geolocation) { state.locStatus = "error"; render(); return; }
+  state.locStatus = "loading"; render();
+  navigator.geolocation.getCurrentPosition(
+    function (pos) {
+      state.location = { lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: pos.coords.accuracy };
+      state.locStatus = "ok"; render();
+    },
+    function () { state.locStatus = "error"; render(); },
+    { enableHighAccuracy: true, timeout: 8000 }
+  );
+}
+
+function buyTicket(route) {
+  const id = "DWL-" + route.id + "-" + Math.random().toString(36).slice(2, 7).toUpperCase();
+  const validUntil = new Date(Date.now() + 3 * 60 * 60 * 1000);
+  const ticket = { id: id, routeId: route.id, type: route.type, from: route.from, to: route.to, boughtAt: Date.now(), validUntil: validUntil.toISOString(), status: "active" };
+  persistTickets([ticket].concat(state.tickets));
+  state.ticketSubtab = "mine";
+  render();
+}
+
+function markUsed(id) {
+  persistTickets(state.tickets.map(function (t) { return t.id === id ? Object.assign({}, t, { status: "used" }) : t; }));
+}
+
+function setTab(t) { state.tab = t; render(); }
+
+// ---------- ticket code svg (visual pattern, deterministic per id) ----------
+function ticketCodeSvg(seed, size) {
+  size = size || 120;
+  const cells = 11;
+  let s = 0;
+  for (let i = 0; i < seed.length; i++) s = (s * 31 + seed.charCodeAt(i)) >>> 0;
+  function rand() { s = (s * 1103515245 + 12345) >>> 0; return (s >>> 8) / 16777216; }
+  const cellSize = size / cells;
+  let rects = "";
+  for (let i = 0; i < cells * cells; i++) {
+    const r = Math.floor(i / cells), c = i % cells;
+    const isFinder = (r < 3 && c < 3) || (r < 3 && c > cells - 4) || (r > cells - 4 && c < 3);
+    if (isFinder) continue;
+    if (rand() > 0.52) {
+      rects += '<rect x="' + (c * cellSize) + '" y="' + (r * cellSize) + '" width="' + cellSize + '" height="' + cellSize + '" fill="#1a1420"/>';
+    }
+  }
+  const finders = [[0, 0], [0, cells - 3], [cells - 3, 0]];
+  finders.forEach(function (f) {
+    const r = f[0], c = f[1];
+    rects += '<rect x="' + (c * cellSize) + '" y="' + (r * cellSize) + '" width="' + (cellSize * 3) + '" height="' + (cellSize * 3) + '" fill="#1a1420"/>';
+    rects += '<rect x="' + ((c + 0.6) * cellSize) + '" y="' + ((r + 0.6) * cellSize) + '" width="' + (cellSize * 1.8) + '" height="' + (cellSize * 1.8) + '" fill="#fdf8f0"/>';
+    rects += '<rect x="' + ((c + 1.1) * cellSize) + '" y="' + ((r + 1.1) * cellSize) + '" width="' + (cellSize * 0.8) + '" height="' + (cellSize * 0.8) + '" fill="#1a1420"/>';
+  });
+  return '<svg width="' + size + '" height="' + size + '" class="ticket-code">' + rects + '</svg>';
+}
+
+// ---------- render ----------
+function render() {
+  const s = state;
+  const nowStr = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  let bodyHtml = "";
+
+  if (s.tab === "home") {
+    const locText = s.locStatus === "ok" && s.location ? (s.location.lat.toFixed(4) + ", " + s.location.lng.toFixed(4))
+      : s.locStatus === "loading" ? "Finding you…"
+      : s.locStatus === "error" ? "Location unavailable"
+      : "Current Location";
+    bodyHtml = ''
+      + '<button class="btn-search" onclick="setTab(\'routes\')"><span>' + ICONS.search + '</span><span>Where are you going?</span></button>'
+      + '<div class="card"><div class="row"><div class="row-left"><div class="icon-circle">' + ICONS.pin + '</div>'
+      + '<div><div class="text-white fs-sm">Pick-Up</div><div class="text-dim fs-xs">' + locText + '</div></div></div>'
+      + '<button class="icon-circle" style="border:none" onclick="useMyLocation()">' + (s.locStatus === "loading" ? "⏳" : ICONS.nav) + '</button></div></div>'
+      + '<div class="grid2"><div class="mode-box mode-active">' + ICONS.bus + '<span class="text-white fs-xs">Bus</span></div>'
+      + '<div class="mode-box mode-inactive">' + ICONS.train + '<span class="text-white fs-xs">Train</span></div></div>'
+      + '<div class="card"><div class="row" style="margin-bottom:8px"><span class="text-white fs-sm">Next Bus Near You</span><span class="badge badge-warn">2 mins</span></div>'
+      + '<div class="text-dim fs-xs" style="margin-bottom:4px">Colombo Fort → Negombo</div>'
+      + '<div class="text-faint fs-xxs">Route 138 · every 15–20 min, 6 AM – 9 PM</div></div>'
+      + '<button class="btn-primary" onclick="setTab(\'live\')">Track Live Status</button>';
+  }
+
+  if (s.tab === "routes") {
+    bodyHtml = '<div class="card" style="display:flex;align-items:center;gap:8px;padding:10px 14px">'
+      + '<span>' + ICONS.search + '</span><input class="search-input" placeholder="Search Colombo Fort → Negombo" value="' + s.query + '" oninput="state.query=this.value"/></div>'
+      + '<div style="display:flex;flex-direction:column;gap:12px">'
+      + ROUTES.map(function (r) {
+        const st = delayStatus(r.baseDelay);
+        const sel = s.selectedRoute.id === r.id ? " selected" : "";
+        return '<div class="card route-card' + sel + '" onclick="selectRoute(\'' + r.id + '\')">'
+          + '<div class="row"><div class="row-left"><span>' + ICONS[r.type] + '</span>'
+          + '<span class="text-white fs-sm">' + (r.type === "bus" ? "Route " + r.id : "Intercity " + r.id) + '</span></div>'
+          + '<span class="badge badge-' + st.tone + '">' + st.label + '</span></div>'
+          + '<div class="text-dim fs-xs" style="margin-top:8px">' + r.depart + ' — ' + r.arrive + '</div>'
+          + '<div class="text-faint fs-xxs" style="margin-top:2px">' + r.from + ' → ' + r.to + '</div></div>';
+      }).join("") + '</div>';
+  }
+
+  if (s.tab === "live") {
+    const r = s.selectedRoute;
+    const currentStop = PATH.reduce(function (acc, st) { return s.progress >= st.pct ? st : acc; }, PATH[0]);
+    let nextIdx = PATH.findIndex(function (st) { return st.pct > s.progress; });
+    if (nextIdx === -1) nextIdx = PATH.length - 1;
+    const nextStop = PATH[nextIdx];
+    const eta = Math.max(1, Math.round(((nextStop.pct - s.progress) / 100) * 55));
+    const st = delayStatus(r.baseDelay);
+    bodyHtml = '<div class="row" style="gap:8px"><button style="background:none;border:none;color:#fff" onclick="setTab(\'routes\')">←</button>'
+      + '<span class="text-dim fs-sm">Live Status · ' + (r.type === "bus" ? "Route " + r.id : "Intercity " + r.id) + '</span></div>'
+      + '<div class="card"><div class="live-tag"><span class="dot-pulse"></span>LIVE</div>'
+      + '<div class="track"><div class="track-fill" style="width:' + s.progress + '%"></div>'
+      + '<div class="track-dot" style="left:calc(' + s.progress + '% - 10px)"><div class="track-dot-inner">' + ICONS[r.type] + '</div></div></div>'
+      + '<div class="row text-faint fs-xxs" style="margin:4px 0 16px"><span>' + PATH[0].name + '</span><span>' + PATH[PATH.length - 1].name + '</span></div>'
+      + '<div class="stop-box stop-current"><div><div class="text-white fs-sm">' + currentStop.name + '</div><div class="text-faint fs-xxs">Current Stop</div></div><span>' + ICONS.check + '</span></div>'
+      + '<div class="stop-box stop-next"><div><div class="text-white fs-sm">' + nextStop.name + '</div><div class="text-faint fs-xxs">Next Stop · ETA ' + eta + ' min</div></div><span>' + ICONS.clock + '</span></div></div>'
+      + '<div class="card"><div class="row" style="margin-bottom:4px"><span class="text-white fs-sm">Status</span><span class="badge badge-' + st.tone + '">' + st.label + '</span></div>'
+      + '<p class="text-faint fs-xxs">' + (st.tone === "ok" ? "Running on schedule. No action needed." : "Delay caused by traffic near the current stop. Estimates update automatically.") + '</p></div>'
+      + (s.location ? '<div class="card"><div class="text-white fs-sm" style="margin-bottom:4px">' + ICONS.pin + ' Your Location</div>'
+        + '<div class="text-faint fs-xxs">Lat ' + s.location.lat.toFixed(5) + ', Lng ' + s.location.lng.toFixed(5) + ' (±' + Math.round(s.location.accuracy) + 'm)</div></div>' : '');
+  }
+
+  if (s.tab === "tickets") {
+    const active = s.tickets.find(function (t) { return t.status === "active"; });
+    const past = s.tickets.filter(function (t) { return t.status !== "active"; });
+    bodyHtml = '<div class="tabs2"><button class="tab2' + (s.ticketSubtab === "buy" ? " active" : "") + '" onclick="setTicketSubtab(\'buy\')">Buy Ticket</button>'
+      + '<button class="tab2' + (s.ticketSubtab === "mine" ? " active" : "") + '" onclick="setTicketSubtab(\'mine\')">My Tickets</button></div>';
+    if (s.ticketSubtab === "buy") {
+      bodyHtml += '<div style="display:flex;flex-direction:column;gap:12px;margin-top:4px">' + ROUTES.map(function (r) {
+        return '<div class="card"><div class="row"><div class="row-left"><span>' + ICONS[r.type] + '</span>'
+          + '<div><div class="text-white fs-sm">' + (r.type === "bus" ? "Route " + r.id : "Intercity " + r.id) + '</div>'
+          + '<div class="text-faint fs-xxs">' + r.from + ' → ' + r.to + ' · ' + r.depart + '</div></div></div>'
+          + '<button class="buy-btn" onclick="buyTicket(' + JSON.stringify(r).replace(/"/g, '&quot;') + ')">Buy</button></div></div>';
+      }).join("") + '</div>';
+    } else {
+      bodyHtml += '<div style="display:flex;flex-direction:column;gap:16px;margin-top:4px">';
+      if (active) {
+        bodyHtml += '<div class="card" style="border-color:rgba(255,177,61,0.3)"><div style="color:#ff9d5c;font-size:12px;font-weight:700;margin-bottom:12px;letter-spacing:0.05em">ACTIVE TICKET</div>'
+          + '<div style="display:flex;gap:16px;align-items:center">' + ticketCodeSvg(active.id)
+          + '<div><div class="text-white" style="font-weight:800;font-size:16px">' + (active.type === "bus" ? "Route " + active.routeId : "Intercity " + active.routeId) + '</div>'
+          + '<div class="text-dim fs-xs">' + active.from + ' → ' + active.to + '</div>'
+          + '<div class="text-faint fs-xxs" style="margin-top:4px">' + active.id + '</div>'
+          + '<div class="text-faint fs-xxs">Valid until ' + new Date(active.validUntil).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) + '</div></div></div>'
+          + '<button style="margin-top:12px;width:100%;text-align:center;font-size:11px;color:rgba(255,255,255,0.4);background:none;border:none;text-decoration:underline" onclick="markUsed(\'' + active.id + '\')">Mark as used</button></div>';
+      } else {
+        bodyHtml += '<div class="text-faint fs-xs" style="text-align:center;padding:24px 0">No active ticket. Buy one to see it here.</div>';
+      }
+      if (past.length > 0) {
+        bodyHtml += '<div class="text-faint fs-xxs" style="font-weight:700">PAST TICKETS</div>' + past.map(function (t) {
+          return '<div class="card" style="opacity:0.6"><div class="row"><div><div class="text-white fs-sm">' + (t.type === "bus" ? "Route " + t.routeId : "Intercity " + t.routeId) + '</div>'
+            + '<div class="text-faint fs-xxs">' + t.from + ' → ' + t.to + '</div></div>'
+            + '<span class="text-faint fs-xxs">' + new Date(t.boughtAt).toLocaleDateString() + '</span></div></div>';
+        }).join("");
+      }
+      bodyHtml += '</div>';
+    }
+  }
+
+  if (s.tab === "profile") {
+    bodyHtml = '<div class="card"><div class="row-left" style="margin-bottom:12px">'
+      + '<div class="icon-circle" style="width:48px;height:48px;font-size:22px">' + ICONS.user + '</div>'
+      + '<div><div class="text-white fs-sm">Passenger Profile</div><div class="text-faint fs-xs">' + s.tickets.length + ' ticket' + (s.tickets.length === 1 ? "" : "s") + ' purchased</div></div></div>'
+      + '<div class="text-faint fs-xxs">Location permission: ' + (s.locStatus === "ok" ? "granted" : s.locStatus === "error" ? "denied / unavailable" : "not requested") + '</div></div>';
+  }
+
+  const navItems = [
+    { key: "home", ic: ICONS.home, lb: "Home" },
+    { key: "routes", ic: ICONS.search, lb: "Routes" },
+    { key: "tickets", ic: ICONS.ticket, lb: "Tickets" },
+    { key: "live", ic: ICONS.bell, lb: "Alerts" },
+    { key: "profile", ic: ICONS.user, lb: "Profile" },
+  ];
+  const navHtml = navItems.map(function (n) {
+    return '<button class="navbtn' + (s.tab === n.key ? " active" : "") + '" onclick="setTab(\'' + n.key + '\')">'
+      + '<span class="ic">' + n.ic + '</span><span class="lb">' + n.lb + '</span></button>';
+  }).join("");
+
+  document.getElementById("root").innerHTML =
+    '<div class="screen"><div class="phone">'
+    + '<div class="statusbar"><span>' + nowStr + '</span><span style="letter-spacing:0.1em">DONT WALK LANKA</span></div>'
+    + '<div class="header"><div class="logo"><img src="icon-192.png" alt="logo"/></div><div><div class="brand-name">Dont Walk Lanka</div>'
+    + '<div class="brand-sub">TRANSPORTATION REIMAGINED</div></div></div>'
+    + '<div class="body">' + bodyHtml + '</div>'
+    + '<div class="bottomnav">' + navHtml + '</div>'
+    + '</div></div>';
+}
+
+function selectRoute(id) {
+  state.selectedRoute = ROUTES.find(function (r) { return r.id === id; });
+  state.progress = 14;
+  state.tab = "live";
+  render();
+}
+function setTicketSubtab(t) { state.ticketSubtab = t; render(); }
+
+// initial render
+render();
+
+// live clock tick
+setInterval(function () { if (state.tab === "home" || state.tab === "live") render(); }, 30000);
+
+// simulate movement of the currently selected vehicle
+setInterval(function () {
+  state.progress = state.progress >= 100 ? 4 : state.progress + 0.6;
+  if (state.tab === "live") render();
+}, 1200);
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function () {
+    navigator.serviceWorker.register("sw.js").catch(function () {});
+  });
+}
+</script>
+</body>
+</html>
